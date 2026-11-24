@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fix or Call</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* Single light theme by choice. Layout idea: a white service desk. One wide ask panel on top, the answer under it, the household record alongside. */
+:root{
+  color-scheme:light;
+  --paper:#ffffff;--wash:#f6f7fb;--card:#ffffff;--ink:#0d1321;--mute:#5b6478;--line:#e6e8ef;--brand:#2742f5;--brand-soft:#eef1ff;--action:#0d1321;--action-ink:#ffffff;
+  --ok:#0f7a52;--ok-soft:#e8f6ef;--info:#1d5fbf;--info-soft:#eaf2fd;--warn:#a85a00;--warn-soft:#fdf2e1;--stop:#b3202c;--stop-soft:#fdecee;--tint:#f1f3f9;
+  --shadow:0 1px 2px rgba(13,19,33,.04),0 12px 32px -12px rgba(13,19,33,.14);
+  --display:"Bricolage Grotesque","Trebuchet MS",system-ui,sans-serif;--body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",Arial,sans-serif;
+}
+*{box-sizing:border-box}html,body{margin:0}body{background:var(--paper);color:var(--ink);font:16px/1.55 var(--body);-webkit-font-smoothing:antialiased}
+.nav{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;max-width:1120px;margin:0 auto;padding:18px 20px}
+.brand{display:flex;gap:10px;align-items:center;font:800 20px/1 var(--display);letter-spacing:-.01em}
+.mark{width:36px;height:36px;border-radius:11px;background:var(--brand);display:grid;place-items:center;flex:none}
+.mark svg{width:21px;height:21px;stroke:#fff;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.hero{background:linear-gradient(180deg,var(--brand-soft),var(--paper) 78%);border-top:1px solid var(--line)}
+.hero-in{max-width:820px;margin:0 auto;padding:44px 20px 8px;display:flex;flex-direction:column;gap:14px;align-items:flex-start}
+.eyebrow{font-size:13px;font-weight:600;color:var(--brand);background:var(--card);border:1px solid var(--line);border-radius:999px;padding:4px 12px}
+h1{font:800 clamp(32px,5.4vw,52px)/1.04 var(--display);margin:0;letter-spacing:-.03em;text-wrap:balance}
+.tagline{color:var(--mute);margin:0;font-size:18px;max-width:56ch;text-wrap:pretty}
+h2{font:600 18px/1.2 var(--display);margin:0;text-wrap:balance}
+.wrap{max-width:820px;margin:0 auto;padding:0 20px;display:flex;flex-direction:column;gap:18px}
+.ask{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:18px;display:flex;flex-direction:column;gap:14px;box-shadow:var(--shadow);margin-top:10px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:20px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.col{display:flex;flex-direction:column;gap:16px;min-width:0}
+.two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}@media (max-width:760px){.two{grid-template-columns:minmax(0,1fr)}}
+.mute{color:var(--mute)}.small{font-size:13.5px}
+button,select,input,textarea{font:inherit;color:var(--ink)}
+button{cursor:pointer;border:1px solid var(--line);background:var(--card);border-radius:12px;padding:9px 14px;transition:background .15s,border-color .15s,transform .05s}
+button:hover:not(:disabled){border-color:#c9cedb}button:active:not(:disabled){transform:translateY(1px)}
+button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-visible,summary:focus-visible{outline:3px solid var(--brand);outline-offset:2px}
+button:disabled{opacity:.5;cursor:default}
+.btn-go{background:var(--action);border-color:var(--action);color:var(--action-ink);font-weight:600;padding:12px 22px;border-radius:14px}.btn-go:hover:not(:disabled){background:#1c2540;border-color:#1c2540}
+.btn-quiet{background:var(--tint);border-color:transparent}.btn-quiet:hover:not(:disabled){background:#e7eaf3;border-color:transparent}
+.seg{display:flex;flex-wrap:wrap;gap:6px}.seg button{padding:7px 14px;font-size:14.5px;border-radius:999px;font-weight:500}
+.seg button[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:#fff}
+#lang.seg{background:var(--tint);padding:4px;border-radius:999px;gap:2px}#lang.seg button{border-color:transparent;background:transparent;padding:6px 14px}#lang.seg button[aria-pressed="true"]{background:var(--card);color:var(--ink);box-shadow:0 1px 3px rgba(13,19,33,.14)}
+.chips{display:flex;flex-wrap:wrap;gap:8px}.chips button{background:var(--card);border-color:var(--line);font-size:14.5px;border-radius:999px;color:var(--ink)}.chips button:hover:not(:disabled){background:var(--brand-soft);border-color:var(--brand);color:var(--brand)}
+.composer{border:1.5px solid var(--line);border-radius:18px;padding:14px;display:flex;flex-direction:column;gap:10px;background:var(--wash)}.composer:focus-within{border-color:var(--brand);background:var(--card)}
+.composer textarea{border:0;background:transparent;resize:vertical;min-height:72px;width:100%;font-size:17px;outline:none}
+.composer .bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between}.bar .left{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.icon-btn{display:inline-flex;gap:7px;align-items:center;font-size:14.5px;background:var(--card)}.icon-btn svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.icon-btn.live{background:var(--stop);border-color:var(--stop);color:#fff}
+.thumb{display:flex;gap:10px;align-items:center;font-size:13.5px}.thumb img{width:52px;height:52px;object-fit:cover;border-radius:10px;border:1px solid var(--line)}
+.legend{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}@media (max-width:640px){.legend{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.lg{display:flex;gap:10px;align-items:center;border:1px solid var(--line);border-radius:14px;padding:10px 12px;font-size:14px;font-weight:500;min-width:0}
+.dot{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;flex:none;background:var(--s);}.dot svg{width:16px;height:16px;stroke:var(--v);fill:none;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}
+#feed{display:flex;flex-direction:column;gap:14px}
+.said{align-self:flex-end;max-width:86%;background:var(--ink);color:#fff;border-radius:18px 18px 4px 18px;padding:10px 15px;overflow-wrap:anywhere}
+.asks{align-self:flex-start;max-width:92%;background:var(--wash);border-radius:18px 18px 18px 4px;padding:12px 15px;display:flex;flex-direction:column;gap:10px;overflow-wrap:anywhere}
+.progress{display:flex;flex-wrap:wrap;gap:6px;align-items:center;color:var(--mute);font-size:13.5px}.progress .step{background:var(--brand-soft);color:var(--brand);border-radius:999px;padding:3px 10px;font-weight:500}
+.ticket{border:1px solid var(--line);border-radius:20px;display:flex;flex-direction:column;background:var(--card);overflow:hidden;overflow-wrap:anywhere;box-shadow:var(--shadow)}
+.ticket .head{display:flex;gap:12px;align-items:center;background:var(--s);padding:16px 20px}
+.ticket .body{display:flex;flex-direction:column;gap:12px;padding:18px 20px 20px}
+.badge{width:42px;height:42px;border-radius:50%;background:var(--v);display:grid;place-items:center;flex:none}
+.badge svg{width:23px;height:23px;stroke:#fff;fill:none;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}
+.ticket h3{font:800 23px/1.1 var(--display);margin:0;color:var(--v);letter-spacing:-.01em}.ticket p{margin:0}.ticket .lead{font-size:18px;font-weight:500}
+.facts{display:flex;flex-wrap:wrap;gap:6px}.fact{font-size:13px;background:var(--tint);border-radius:999px;padding:3px 11px;color:var(--ink);font-weight:500}
+.label{font-size:12px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--mute)}
+.steps{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}.steps label{display:flex;gap:11px;align-items:flex-start;cursor:pointer;border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+.steps input{margin-top:3px;width:18px;height:18px;accent-color:var(--brand);flex:none}.steps input:checked+span{text-decoration:line-through;color:var(--mute)}
+.plain{margin:0;padding-left:20px}.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+details summary{cursor:pointer;color:var(--mute);font-size:13.5px}details ol{margin:6px 0 0;padding-left:20px;color:var(--mute);font-size:13.5px}
+.meter{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.meter div{background:var(--wash);border-radius:14px;padding:12px}.meter b{display:block;font:800 30px/1 var(--display);font-variant-numeric:tabular-nums;margin-bottom:4px}
+.meter div:nth-child(2){background:var(--ok-soft)}.meter div:nth-child(2) b{color:var(--ok)}
+.field{display:flex;flex-direction:column;gap:5px;font-size:14px;font-weight:500}.field select,.field input{border:1px solid var(--line);border-radius:12px;padding:10px;background:var(--card);width:100%;font-weight:400}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.appl{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr) 78px auto;gap:6px;align-items:center}.appl input,.appl select{border:1px solid var(--line);border-radius:10px;padding:8px;background:var(--card);min-width:0;width:100%}
+.hist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}.hist li{border-left:4px solid var(--v);padding:1px 0 1px 12px}.hist .t{font-weight:600}
+.notice{max-width:820px;margin:0 auto;padding:24px 20px 48px;font-size:13px;color:var(--mute)}
+.banner{background:var(--warn-soft);color:var(--warn);border-radius:14px;padding:12px 14px;font-size:14.5px}
+[hidden]{display:none!important}
+@media (prefers-reduced-motion:no-preference){.ticket,.said,.asks{animation:in .28s ease-out}@keyframes in{from{transform:translateY(8px);opacity:.3}to{transform:none;opacity:1}}}
+</style>
+</head>
+<body>
+<nav class="nav" aria-label="Top">
+  <div class="brand"><div class="mark" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M14.5 6.5a4 4 0 0 0-5.4 4.9L3.5 17v3.5H7l5.6-5.6a4 4 0 0 0 4.9-5.4l-2.6 2.6-2.1-.5-.5-2.1z"/></svg></div>Fix or Call</div>
+  <div class="seg" role="group" aria-label="Reply language" id="lang"><button type="button" data-v="English" aria-pressed="true">English</button><button type="button" data-v="Hinglish" aria-pressed="false">Hinglish</button><button type="button" data-v="Hindi" aria-pressed="false">हिंदी</button></div>
+</nav>
+<div class="hero"><div class="hero-in">
+  <span class="eyebrow">Home repair triage</span>
+  <h1>Something wrong at home? Find out if you need to call anyone.</h1>
+  <p class="tagline">Describe the problem or add a photo. You get one clear answer and the next step. If you do not need a paid visit, it tells you.</p>
+</div>
+<div class="wrap">
+  <section class="ask" aria-label="Describe your problem">
+    <div class="seg" role="group" aria-label="Problem area" id="areas"></div>
+    <div class="composer">
+      <textarea id="box" aria-label="Describe the problem" placeholder="What do you see, hear or smell? Example: the kitchen tap drips even when fully closed."></textarea>
+      <div class="thumb" id="thumb" hidden><img id="thumbImg" alt="Attached photo"><span id="thumbName"></span><button type="button" class="btn-quiet" id="thumbX">Remove photo</button></div>
+      <div class="bar"><div class="left">
+        <button type="button" class="icon-btn" id="photoBtn" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="6" width="18" height="14" rx="2"/><circle cx="12" cy="13" r="3.5"/><path d="M8 6l1.5-2h5L16 6"/></svg>Add a photo</button>
+        <input type="file" id="photo" accept="image/*" hidden>
+        <button type="button" class="icon-btn" id="micBtn" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg><span id="micTxt">Speak</span></button>
+      </div><button type="button" class="btn-go" id="send">Check this problem</button></div>
+    </div>
+    <div class="label">Or start with a common one</div>
+    <div class="chips" id="chips"></div>
+    <div class="banner" id="banner" hidden></div>
+  </section>
+</div></div>
+
+<div class="wrap" style="margin-top:22px">
+  <section class="card" id="feedCard" aria-live="polite" hidden><div id="feed"></div><div class="row"><button type="button" class="btn-quiet" id="newBtn">Start a new problem</button><button type="button" class="btn-quiet" id="copySess">Copy session summary</button><span class="small mute" id="copied"></span></div></section>
+
+  <section class="card" aria-labelledby="legh"><h2 id="legh">The six answers you can get</h2><div class="legend" id="legend"></div></section>
+
+  <div class="two">
+  <section class="card" aria-labelledby="meterh">
+    <h2 id="meterh">Your record on this device</h2>
+    <div class="meter"><div><b id="mAll">0</b><span class="small mute">problems checked</span></div><div><b id="mNo">0</b><span class="small mute">needed no paid visit</span></div><div><b id="mPro">0</b><span class="small mute">needed a professional</span></div></div>
+    <ul class="hist" id="hist"></ul><p class="small mute" id="histEmpty" style="margin:0">Nothing checked yet. Past answers will be listed here.</p>
+    <div class="row"><button type="button" class="btn-quiet" id="clearHist" hidden>Clear record</button></div>
+  </section>
+  <section class="card" aria-labelledby="homeh">
+    <h2 id="homeh">Your home</h2><p class="small mute" style="margin:0">Optional. It changes who should fix what. Saved only in this browser.</p>
+    <div class="grid2"><label class="field">Home<select id="home"><option value="unknown">Not set</option><option value="rented">Rented</option><option value="owned">Owned</option></select></label>
+    <label class="field">Building<select id="soc"><option value="unknown">Not set</option><option value="society">Apartment in a society</option><option value="independent">Independent house</option></select></label></div>
+    <div class="label">Appliances and when you bought them</div><div id="appls" class="col" style="gap:6px"></div>
+    <div class="row"><button type="button" class="btn-quiet" id="addAppl">Add an appliance</button></div>
+  </section>
+  </div>
+</div>
+<p class="notice">Independent prototype. It does not book services, contact any company or professional, or access any account. Guidance is general. For gas, burning smells, sparks or water near electrics, stop and get qualified help.</p>
+<script>
+const $=id=>document.getElementById(id);
+const el=(t,c,txt)=>{const e=document.createElement(t);if(c)e.className=c;if(txt!=null)e.textContent=txt;return e;};
+const store={get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d;}catch(e){return d;}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}};
+
+/* ---------- Knowledge the tools serve ---------- */
+const HAZARDS=[
+ [/gas (smell|leak)|smell of gas|lpg|cylinder leak|gas ki (smell|badbu)/i,"Possible gas leak. Open windows, touch no switches or flames, close the regulator, leave the room and call the gas emergency number."],
+ [/spark|burning smell|burnt smell|smoke|melt|shock|current (in|on|aa)|tingl|jal(ne| rah)/i,"Electrical danger. Switch off the main breaker, do not touch the fitting, call a qualified electrician."],
+ [/water.*(switch|socket|board|meter|wiring)|(switch|socket|board|wiring).*water|flood|burst pipe/i,"Water near electrics or a burst pipe. Turn off the main water valve and the power to that area first."],
+ [/ceiling (crack|sag|fall)|wall crack.*(wide|growing)|structural|plaster falling/i,"Possible structural issue. Keep away from the area and inform the society or owner."]
+];
+const DIY={
+ dripping_tap:{area:"Water",fits:"Tap drips when closed",time:"10 min",tools:"Spanner",level:"Easy",steps:["Close the angle valve under the sink and see if the drip stops","Tighten the handle screw and the packing nut by a quarter turn","Still dripping? The washer or cartridge is worn, a short job for a plumber"],stop_if:"Water comes from inside the wall, or the valve will not close"},
+ slow_drain:{area:"Water",fits:"Sink or bathroom drain is slow",time:"15 min",tools:"Gloves, plunger",level:"Easy",steps:["Lift the drain cover and clear hair and debris from the trap","Pour hot, not boiling, water and use a plunger","Avoid repeated chemical cleaners on old pipes"],stop_if:"Water backs up from another drain or there is a sewage smell"},
+ running_flush:{area:"Water",fits:"Toilet flush keeps running",time:"10 min",tools:"None",level:"Easy",steps:["Open the tank and free the float if it is stuck","Check the flap valve sits flat and wipe off deposits","Set the float so water stops below the overflow pipe"],stop_if:"The tank is concealed in the wall or a part is cracked"},
+ low_pressure_tap:{area:"Water",fits:"One tap has weak flow",time:"10 min",tools:"Cloth, pliers",level:"Easy",steps:["Unscrew the aerator at the tap tip","Rinse out grit and scale, soak in vinegar if crusted","Refit and check the angle valve is fully open"],stop_if:"Every tap in the home is weak, which points to supply or tank"},
+ shower_leak:{area:"Water",fits:"Shower head or hose leaks at the joint",time:"10 min",tools:"Thread seal tape",level:"Easy",steps:["Unscrew the joint by hand","Wrap thread seal tape five turns clockwise","Refit hand tight and test"],stop_if:"The leak is from the wall mixer body itself"},
+ dead_light:{area:"Electrical",fits:"One light or fan stopped working",time:"5 min",tools:"New bulb",level:"Easy",steps:["Try a new bulb or tube first","Check if the breaker for that room has tripped and reset it once","Test another appliance in the same socket"],stop_if:"The breaker trips again, the switch is warm, or a board would need opening"},
+ tripping_mcb:{area:"Electrical",fits:"Breaker trips when one appliance runs",time:"5 min",tools:"None",level:"Easy",steps:["Unplug everything on that circuit and reset the breaker","Plug appliances back one at a time to find the one that trips it","Stop using that appliance until it is checked"],stop_if:"It trips with nothing plugged in. That needs an electrician"},
+ fan_slow:{area:"Electrical",fits:"Ceiling fan runs slow or hums",time:"5 min",tools:"None",level:"Easy",steps:["Check the regulator is at full and try each step","Note whether speed changes at all between steps","If speed never changes, the capacitor is likely weak, a quick job for an electrician"],stop_if:"The fan wobbles, sparks or smells hot"},
+ ac_not_cooling:{area:"Cooling",fits:"AC runs but cools weakly",time:"20 min",tools:"Water, cloth",level:"Easy",steps:["Wash the indoor filters under running water and dry them","Check the mode is Cool and the set temperature is below room temperature","See that the outdoor unit is clear and its fan spins"],stop_if:"Ice on pipes, tripping, or still weak after clean filters"},
+ ac_water_drip:{area:"Cooling",fits:"AC drips water indoors",time:"15 min",tools:"Cloth",level:"Medium",steps:["Switch off the AC","Clean the filters, a choked filter can freeze the coil and drip","Check the drain pipe outside is not bent or blocked at its end"],stop_if:"Dripping continues, the drain tray inside needs a technician"},
+ ac_remote:{area:"Cooling",fits:"AC ignores the remote",time:"5 min",tools:"Batteries",level:"Easy",steps:["Replace the remote batteries","Test with the manual button on the indoor unit","Switch off at the wall for one minute and restart"],stop_if:"The unit ignores its own manual button too"},
+ cooler_smell:{area:"Cooling",fits:"Air cooler smells or cools poorly",time:"20 min",tools:"Brush",level:"Easy",steps:["Drain and scrub the tank","Rinse or replace the cooling pads","Refill with fresh water and run the pump alone for five minutes"],stop_if:"The pump does not run"},
+ washer_not_draining:{area:"Appliances",fits:"Washing machine holds water",time:"15 min",tools:"Tray, cloth",level:"Medium",steps:["Switch off and unplug","Check the drain hose is not kinked or pushed too deep","Open the small front panel and clean the drain filter over a tray"],stop_if:"An error code stays, or the machine is under warranty"},
+ fridge_weak:{area:"Appliances",fits:"Fridge not cooling well",time:"15 min",tools:"Dry brush",level:"Easy",steps:["Check the thermostat dial was not knocked","Leave 10 cm behind the fridge and brush dust off the coils","Close the door on a sheet of paper to test the seal"],stop_if:"Compressor is silent or clicking, or food is spoiling"},
+ ro_slow:{area:"Appliances",fits:"Water purifier is slow or taste changed",time:"5 min",tools:"None",level:"Easy",steps:["Check when filters were last changed, most last 6 to 12 months","Confirm the inlet valve is fully open","Look for a service-due light"],stop_if:"There is a leak, or the unit is on a brand service plan"},
+ geyser_no_heat:{area:"Appliances",fits:"Geyser gives lukewarm water",time:"5 min",tools:"None",level:"Easy",steps:["Check the thermostat knob setting","Allow a full heating cycle of 15 to 20 minutes","Check the breaker for the geyser has not tripped"],stop_if:"The breaker trips, water leaks from the body, or there is no heat at all"},
+ mixer_dead:{area:"Appliances",fits:"Mixer grinder stopped mid-use",time:"10 min",tools:"None",level:"Easy",steps:["Unplug and let it cool for 15 minutes","Press the red overload reset button under the base","Run with a smaller load"],stop_if:"There is a burning smell or it will not reset"},
+ loose_hinge:{area:"Furniture",fits:"Cupboard door sags or hinge is loose",time:"10 min",tools:"Screwdriver",level:"Easy",steps:["Tighten the hinge screws by hand","If a screw spins free, pack the hole with a matchstick and wood glue, then refit","Use the hinge adjustment screw to realign the door"],stop_if:"The board has split or the hinge is broken"},
+ door_rubbing:{area:"Furniture",fits:"Door rubs on the frame in monsoon",time:"10 min",tools:"Screwdriver, candle wax",level:"Easy",steps:["Tighten the top hinge screws, a sagging door rubs at the bottom corner","Rub candle wax where it catches","Wait for a dry week before deciding to plane it"],stop_if:"It still jams in dry weather, a carpenter can plane it"},
+ drawer_stuck:{area:"Furniture",fits:"Drawer is stiff or off its channel",time:"10 min",tools:"Screwdriver",level:"Easy",steps:["Pull the drawer fully out and check both channels","Clear debris and tighten channel screws","Reseat both sides together until they click"],stop_if:"A channel is bent or bearings have fallen out"},
+ ants_kitchen:{area:"Pests",fits:"Ants or a few cockroaches in the kitchen",time:"20 min",tools:"Gel bait",level:"Easy",steps:["Wipe counters and seal food at night","Place gel bait dots near entry points, away from children and pets","Seal gaps around pipes with filler"],stop_if:"You see them in daylight in several rooms after two weeks"}
+};
+const JOBS={
+ plumber:{usual_visit:"Diagnosis on site, then a small fixed job such as a washer, cartridge, trap or connector",ask_before:["Is there a visit or inspection charge, and is it adjusted if I go ahead?","Will you show me the part before fitting it?"],often_not_needed:["Replacing the whole tap when only the cartridge is worn"]},
+ electrician:{usual_visit:"Testing the point and replacing a switch, socket, regulator, capacitor or holder",ask_before:["Is there a minimum or visit charge for a single point?","Do I buy the part or will you bring one, and at what rate?"],often_not_needed:["Replacing a whole switchboard for one faulty switch"]},
+ ac:{usual_visit:"Filter and coil cleaning, drain check and a gas pressure reading",ask_before:["Will you show the pressure reading before suggesting a gas refill?","What exactly is included in the service?"],often_not_needed:["Gas refill without a pressure reading or a located leak"]},
+ appliance:{usual_visit:"Fault diagnosis, then a part replacement if needed",ask_before:["Is this still under brand warranty or a service plan?","Can I keep the old part you replace?"],often_not_needed:["Paid third-party repair while brand warranty is active"]},
+ carpenter:{usual_visit:"Hinge, lock, channel or handle repair, or planing a door",ask_before:["Is it charged per item or per visit?","Do you carry matching fittings?"],often_not_needed:["A full hinge set when screws are only loose"]},
+ cleaning:{usual_visit:"A room-by-room checklist with materials",ask_before:["What is excluded from the checklist?","How long will the team stay?"],often_not_needed:["Add-ons for areas cleaned recently"]},
+ pest:{usual_visit:"Inspection, then gel or spray treatment with a follow-up window",ask_before:["Is it safe for children and pets, and how long should we stay out?","Is a repeat visit included?"],often_not_needed:["Whole-home treatment for one room seen once"]}
+};
+const WARRANTY={"washing machine":2,"fridge":1,"refrigerator":1,"ac":1,"air conditioner":1,"water purifier":1,"ro":1,"geyser":2,"microwave":1,"tv":1,"mixer":2,"chimney":1,"other":1};
+const AREAS=["Water","Electrical","Cooling","Appliances","Furniture","Pests"];
+const STARTERS={Water:["Kitchen tap keeps dripping","Bathroom drain is slow","Flush keeps running"],Electrical:["One light stopped working","Breaker keeps tripping","Ceiling fan is slow"],Cooling:["AC is on but not cooling well","AC is dripping water inside","AC is not responding to the remote"],Appliances:["Washing machine is not draining","Fridge is not cooling properly","Geyser water is only lukewarm"],Furniture:["Cupboard door hinge is loose","Door rubs on the frame","Drawer is stuck"],Pests:["Ants in the kitchen","Saw a few cockroaches at night","Termite marks on a wooden shelf"]};
+const V={fix_it_yourself:["Fix it yourself","--ok","M5 12.5l4.5 4.5L19 7.5"],wait_and_watch:["Wait and watch","--info","M12 7v5.5l3.5 2M12 3a9 9 0 1 0 0 18a9 9 0 0 0 0-18"],ask_owner_or_society:["Ask your owner or society first","--info","M4 11l8-7 8 7M6.5 9.5V20h11V9.5"],use_brand_service:["Use the brand's service","--info","M12 3l7 3v5.5c0 4.5-3 7.6-7 9.5-4-1.9-7-5-7-9.5V6z"],call_a_professional:["Call a professional","--warn","M14.5 6.5a4 4 0 0 0-5.4 4.9L3.5 17v3.5H7l5.6-5.6a4 4 0 0 0 4.9-5.4"],stop_urgent:["Stop. This is urgent","--stop","M12 7.5v6M12 17.2v.3M12 3l9.5 17h-19z"]};
+
+/* ---------- State ---------- */
+let rec=null,busy=false,history=[],trace=[],verdict=null,choice=null,diyUsed=null,photo=null,lang="English",area="Water",listening=false,sessionLog=[];
+let profile=store.get("foc_profile",{home:"unknown",soc:"unknown",appliances:[]});
+let record=store.get("foc_record",[]);
+
+/* ---------- Tools ---------- */
+const profText=()=>"Home: "+profile.home+". Building: "+profile.soc+". Appliances: "+(profile.appliances.filter(a=>a.type).map(a=>a.type+(a.brand?" ("+a.brand+")":"")+(a.year?", bought "+a.year:"")).join("; ")||"none listed")+".";
+const TOOLS=[
+ {name:"safety_check",description:"ALWAYS call first with the person's own words. Returns hazards that mean stop and get qualified help.",inputSchema:{type:"object",properties:{issue:{type:"string"}},required:["issue"]},
+  execute:({issue})=>{const h=HAZARDS.filter(x=>x[0].test(issue||"")).map(x=>x[1]);return {hazard:h.length>0,actions:h};}},
+ {name:"diy_guide",description:"Safe do-it-yourself steps for a common small problem. Keys: "+Object.keys(DIY).join(", ")+". Returns not_found if none fits. Never invent steps.",inputSchema:{type:"object",properties:{key:{type:"string"}},required:["key"]},
+  execute:({key})=>{const d=DIY[key];if(!d)return {not_found:true};diyUsed=d;return d;}},
+ {name:"visit_brief",description:"What a professional visit for a trade usually involves, what to ask first, and work that is often not needed. Trades: "+Object.keys(JOBS).join(", ")+".",inputSchema:{type:"object",properties:{trade:{type:"string"}},required:["trade"]},
+  execute:({trade})=>JOBS[trade]||{not_found:true}},
+ {name:"who_is_responsible",description:"For rented homes or society flats: whether the tenant, owner or society usually arranges this. area is one of fixture, appliance_owned_by_tenant, appliance_provided_by_owner, common_area, wiring_or_concealed_pipe, consumable.",inputSchema:{type:"object",properties:{area:{type:"string"}},required:["area"]},
+  execute:({area})=>{const r=profile.home==="rented",s=profile.soc==="society";const m={fixture:r?"Usually the owner's fixture. Inform the owner first; small wear items are often paid by the tenant":"Yours to arrange",appliance_owned_by_tenant:"Yours to arrange",appliance_provided_by_owner:"Inform the owner before any paid repair",common_area:s?"Society maintenance":"Yours to arrange",wiring_or_concealed_pipe:r?"Owner's responsibility. In a society, maintenance may need to inspect first":(s?"Check with society maintenance if shared lines are involved":"Yours to arrange"),consumable:"Yours: bulbs, batteries, filters"};return {home:profile.home,building:profile.soc,guidance:m[area]||"Unclear. Ask the owner or society once before paying for a visit"};}},
+ {name:"warranty_check",description:"Check if an appliance from the person's saved home profile is probably still under brand warranty. Use before recommending any paid appliance repair.",inputSchema:{type:"object",properties:{appliance:{type:"string"}},required:["appliance"]},
+  execute:({appliance})=>{const q=(appliance||"").toLowerCase();const a=profile.appliances.find(x=>x.type&&(q.includes(x.type.toLowerCase())||x.type.toLowerCase().includes(q)));if(!a||!a.year)return {known:false,advice:"Purchase year not saved. Ask the person roughly when it was bought."};const yrs=new Date().getFullYear()-Number(a.year);const typ=WARRANTY[a.type.toLowerCase()]||1;return {known:true,brand:a.brand||null,age_years:yrs,typical_warranty_years:typ,probably_in_warranty:yrs<typ,note:"Typical standard warranty only. Compressors and motors often carry longer cover; the bill or warranty card is the proof."};}},
+ {name:"ask_choice",description:"Ask the person ONE short question with 2 to 4 tappable answers when a key fact is missing. After calling it, stop and do not call give_verdict in the same turn.",inputSchema:{type:"object",properties:{question:{type:"string"},options:{type:"array",items:{type:"string"}}},required:["question","options"]},
+  execute:(c)=>{choice=c;return {shown:true};}},
+ {name:"give_verdict",description:"Call exactly once when you can decide. Ends the turn.",inputSchema:{type:"object",properties:{verdict:{type:"string",enum:Object.keys(V)},headline:{type:"string",description:"One plain sentence, at most 16 words"},why:{type:"string",description:"One or two sentences"},steps:{type:"array",items:{type:"string"},description:"What to do now, at most 4"},tell_the_professional:{type:"array",items:{type:"string"},description:"Only for call_a_professional: what to say and ask, at most 4"},often_not_needed:{type:"array",items:{type:"string"},description:"Only for call_a_professional: work to question if it is suggested, at most 2"},come_back_if:{type:"string"}},required:["verdict","headline","why","steps"]},
+  execute:(v)=>{verdict=v;return {recorded:true};}}
+];
+const NICE={safety_check:"Checking for danger",diy_guide:"Looking for a safe fix",visit_brief:"Preparing what to ask",who_is_responsible:"Checking who should arrange it",warranty_check:"Checking warranty",ask_choice:"Needs one detail",give_verdict:"Deciding"};
+let progEl=null;
+const wrap=t=>({name:t.name,description:t.description,inputSchema:t.inputSchema,execute:async(i)=>{const r=await t.execute(i||{});trace.push(t.name);if(progEl)progEl.appendChild(el("span","step",NICE[t.name]||t.name));return r;}});
+const SYSTEM=()=>`You are Fix or Call, a home repair triage helper for households in India. Tell the person honestly whether their problem needs a paid professional visit.
+Rules:
+- Call safety_check first on every new problem. If it reports a hazard, give verdict stop_urgent using its actions and nothing else.
+- Prefer the smallest sufficient answer. If a step set from diy_guide fits, recommend it. Never invent DIY steps that diy_guide did not return. Never suggest opening switchboards, wiring, gas lines or sealed appliance parts.
+- If the home is rented or in a society and the issue may belong to the owner or society, call who_is_responsible.
+- For any appliance, call warranty_check before suggesting paid repair. If it is probably in warranty or on a service plan, the verdict is use_brand_service.
+- Only when a visit is truly needed, call visit_brief and pass on what to ask and what is often not needed, so the person is not oversold.
+- If the person says the DIY steps did not work, move to the next sensible verdict rather than repeating the steps.
+- Never recommend a service the problem does not need. Never mention prices, discounts, offers, memberships or any company by name. You cannot book or contact anyone.
+- If one key fact is missing, call ask_choice once instead of guessing.
+- If a photo is attached, describe in a few words what you can see and use it.
+- Write every text field in ${lang}${lang==="Hinglish"?" (Hindi in Roman script mixed with English, the way people text)":""}. Keep it short and plain.
+Household: ${profText()}`;
+
+/* ---------- Rendering ---------- */
+function icon(path){const s=document.createElementNS("http://www.w3.org/2000/svg","svg");s.setAttribute("viewBox","0 0 24 24");s.setAttribute("aria-hidden","true");const p=document.createElementNS("http://www.w3.org/2000/svg","path");p.setAttribute("d",path);s.appendChild(p);return s;}
+function ticket(v,tr,problem,rec){
+  const meta=V[v.verdict]||V.call_a_professional;const outer=el("article","ticket");outer.style.setProperty("--v","var("+meta[1]+")");outer.style.setProperty("--s","var("+meta[1]+"-soft)");const t=el("div","body");
+  const head=el("div","head"),b=el("div","badge");b.appendChild(icon(meta[2]));head.appendChild(b);head.appendChild(el("h3",null,meta[0]));outer.appendChild(head);outer.appendChild(t);
+  t.appendChild(el("p","lead",v.headline||""));t.appendChild(el("p","mute",v.why||""));
+  if(v.verdict==="fix_it_yourself"&&diyUsed){const f=el("div","facts");[["Time",diyUsed.time],["Needs",diyUsed.tools],["Level",diyUsed.level]].forEach(x=>f.appendChild(el("span","fact",x[0]+": "+x[1])));t.appendChild(f);}
+  if(v.steps&&v.steps.length){t.appendChild(el("div","label","What to do now"));const ul=el("ul","steps");v.steps.slice(0,4).forEach(s=>{const li=el("li"),l=el("label"),c=el("input");c.type="checkbox";l.appendChild(c);l.appendChild(el("span",null,s));li.appendChild(l);ul.appendChild(li);});t.appendChild(ul);}
+  const plain=(lab,arr)=>{if(!arr||!arr.length)return;t.appendChild(el("div","label",lab));const ul=el("ul","plain");arr.slice(0,4).forEach(s=>ul.appendChild(el("li",null,s)));t.appendChild(ul);};
+  plain("Say and ask this",v.tell_the_professional);plain("Question it if they suggest",v.often_not_needed);
+  if(v.come_back_if){t.appendChild(el("div","label","This changes if"));t.appendChild(el("p",null,v.come_back_if));}
+  const row=el("div","row");
+  if(v.verdict==="call_a_professional"){const c=el("button","btn-quiet","Copy this brief");c.type="button";const note=el("span","small mute");c.onclick=()=>copy("Problem: "+problem+"\n"+(v.tell_the_professional||[]).map(x=>"- "+x).join("\n")+((v.often_not_needed||[]).length?"\nQuestion if suggested:\n"+v.often_not_needed.map(x=>"- "+x).join("\n"):""),note);row.appendChild(c);row.appendChild(note);}
+  if(v.verdict==="fix_it_yourself"||v.verdict==="wait_and_watch"){row.appendChild(el("span","small mute","Did this sort it out?"));
+    const y=el("button","btn-quiet","Yes, sorted"),n=el("button","btn-quiet","No, still a problem");y.type=n.type="button";
+    y.onclick=()=>{rec.outcome="sorted without a visit";saveRecord();y.disabled=n.disabled=true;sessionLog.push("Outcome: sorted without a visit");};
+    n.onclick=()=>{rec.outcome="steps did not work";saveRecord();y.disabled=n.disabled=true;sessionLog.push("Outcome: steps did not work");ask("I tried those steps and the problem is still there.");};row.appendChild(y);row.appendChild(n);}
+  if(row.children.length)t.appendChild(row);
+  const d=el("details"),s=el("summary",null,"How it decided ("+tr.length+" checks)");d.appendChild(s);const ol=el("ol");tr.forEach(x=>ol.appendChild(el("li",null,NICE[x]||x)));d.appendChild(ol);t.appendChild(d);
+  $("feed").appendChild(outer);outer.scrollIntoView({block:"nearest",behavior:"smooth"});
+}
+function copy(text,note){const done=m=>{if(note){note.textContent=m;setTimeout(()=>note.textContent="",2500);}};try{navigator.clipboard.writeText(text).then(()=>done("Copied"),()=>done("Copy was blocked. Select the text and copy it."));}catch(e){done("Copy was blocked. Select the text and copy it.");}}
+function saveRecord(){store.set("foc_record",record);renderRecord();}
+function renderRecord(){
+  const noVisit=record.filter(r=>["fix_it_yourself","wait_and_watch","ask_owner_or_society","use_brand_service"].includes(r.verdict)).length;
+  $("mAll").textContent=record.length;$("mNo").textContent=noVisit;$("mPro").textContent=record.filter(r=>r.verdict==="call_a_professional"||r.verdict==="stop_urgent").length;
+  const h=$("hist");h.textContent="";record.slice(-6).reverse().forEach(r=>{const li=el("li");li.style.setProperty("--v","var("+(V[r.verdict]||V.call_a_professional)[1]+")");li.appendChild(el("div","t",r.problem));li.appendChild(el("div","small mute",(V[r.verdict]||[r.verdict])[0]+" · "+r.date+(r.outcome?" · "+r.outcome:"")));h.appendChild(li);});
+  $("histEmpty").hidden=record.length>0;$("clearHist").hidden=record.length===0;
+}
+function banner(msg){$("banner").textContent=msg;$("banner").hidden=!msg;}
+
+/* ---------- Agent loop: the model picks tools, the page runs them ---------- */
+function toJpeg(file){return new Promise((res,rej)=>{const im=new Image();im.onload=()=>{const m=1024,k=Math.min(1,m/Math.max(im.width,im.height));const c=document.createElement("canvas");c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);c.getContext("2d").drawImage(im,0,0,c.width,c.height);res(c.toDataURL("image/jpeg",.8).split(",")[1]);};im.onerror=rej;im.src=URL.createObjectURL(file);});}
+async function runAgent(system,msgs,tools,img){
+  const api=msgs.map(m=>({role:m.role,content:m.content}));
+  if(img){const last=api[api.length-1];last.content=[{type:"image",source:{type:"base64",media_type:"image/jpeg",data:img}},{type:"text",text:last.content}];}
+  const defs=tools.map(t=>({name:t.name,description:t.description,input_schema:t.inputSchema}));
+  for(let turn=0;turn<8;turn++){
+    const r=await fetch("/api/chat",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({system,messages:api,tools:defs})});
+    if(!r.ok){throw {code:r.status===429?"rate_limited":r.status===503?"setup":"error"};}
+    const j=await r.json();const blocks=j.content||[];api.push({role:"assistant",content:blocks});
+    const uses=blocks.filter(b=>b.type==="tool_use");const text=blocks.filter(b=>b.type==="text").map(b=>b.text).join("\n");
+    if(!uses.length)return {text};
+    const results=[];for(const u of uses){const t=tools.find(x=>x.name===u.name);let out;try{out=t?await t.execute(u.input||{}):{error:"unknown tool"};}catch(e){out={error:"tool failed"};}results.push({type:"tool_result",tool_use_id:u.id,content:JSON.stringify(out)});}
+    api.push({role:"user",content:results});
+    if(verdict||choice)return {text};
+  }
+  return {text:""};
+}
+
+/* ---------- Asking ---------- */
+async function ask(text){
+  text=(text||"").trim();if(busy||(!text&&!photo))return;if(!text)text="Please look at the attached photo.";
+  banner("");busy=true;$("send").disabled=true;$("feedCard").hidden=false;
+  $("feed").appendChild(el("div","said",text+(photo?"  [photo attached]":"")));$("box").value="";
+  history.push({role:"user",content:text});sessionLog.push("Person: "+text+(photo?" [photo]":""));
+  const msgs=history.map(m=>({role:m.role,content:m.content}));
+  trace=[];verdict=null;choice=null;diyUsed=null;
+  progEl=el("div","progress");progEl.appendChild(el("span",null,"Working:"));$("feed").appendChild(progEl);progEl.scrollIntoView({block:"nearest"});
+  const img=photo?await toJpeg(photo).catch(()=>null):null;
+  const firstProblem=history[0].content;
+  try{
+    const res=await runAgent(SYSTEM(),msgs,TOOLS.map(wrap),img);const reply=(res.text||"").trim();progEl.remove();
+    if(verdict){const rec={problem:firstProblem.slice(0,70),verdict:verdict.verdict,date:new Date().toLocaleDateString("en-IN",{day:"numeric",month:"short"}),checks:trace.slice()};record.push(rec);saveRecord();
+      ticket(verdict,trace.slice(),firstProblem,rec);history.push({role:"assistant",content:"Verdict given: "+verdict.verdict+". "+(verdict.headline||"")});sessionLog.push("Verdict: "+verdict.verdict+" | "+(verdict.headline||"")+" | checks: "+trace.join(" > "));}
+    else if(choice){const a=el("div","asks");a.appendChild(el("div",null,choice.question||reply));const c=el("div","chips");(choice.options||[]).slice(0,4).forEach(o=>{const b=el("button",null,o);b.type="button";b.onclick=()=>{c.querySelectorAll("button").forEach(x=>x.disabled=true);ask(o);};c.appendChild(b);});a.appendChild(c);$("feed").appendChild(a);a.scrollIntoView({block:"nearest"});history.push({role:"assistant",content:choice.question||reply||"(asked a question)"});sessionLog.push("Asked: "+(choice.question||""));}
+    else{$("feed").appendChild(el("div","asks",reply||"I could not work that out. What do you see or hear?"));history.push({role:"assistant",content:reply||"(asked for detail)"});sessionLog.push("Replied: "+reply);}
+  }catch(e){if(progEl)progEl.remove();history.pop();banner(e&&e.code==="rate_limited"?"Too many requests just now. Try again in a minute.":e&&e.code==="setup"?"The assistant is not set up yet on this deployment.":"That did not go through. Check your connection and try again.");}
+  clearPhoto();busy=false;$("send").disabled=false;
+}
+function clearPhoto(){photo=null;$("thumb").hidden=true;$("photo").value="";}
+
+/* ---------- Wiring ---------- */
+function drawAreas(){const a=$("areas");a.textContent="";AREAS.forEach(x=>{const b=el("button",null,x);b.type="button";b.setAttribute("aria-pressed",x===area);b.onclick=()=>{area=x;drawAreas();};a.appendChild(b);});
+  const c=$("chips");c.textContent="";STARTERS[area].forEach(s=>{const b=el("button",null,s);b.type="button";b.onclick=()=>{newProblem();ask(s);};c.appendChild(b);});}
+function newProblem(){history=[];$("feed").textContent="";$("feedCard").hidden=true;banner("");}
+$("send").onclick=()=>ask($("box").value);
+$("box").addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();ask($("box").value);}});
+$("newBtn").onclick=()=>{newProblem();$("box").focus();};
+$("copySess").onclick=()=>copy("Fix or Call session\n"+profText()+"\n"+sessionLog.join("\n"),$("copied"));
+$("clearHist").onclick=()=>{record=[];saveRecord();};
+$("lang").querySelectorAll("button").forEach(b=>b.onclick=()=>{lang=b.dataset.v;$("lang").querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed",x===b));});
+$("photoBtn").onclick=()=>$("photo").click();
+$("photo").onchange=e=>{const f=e.target.files&&e.target.files[0];if(!f)return;if(f.size>6*1024*1024){banner("That photo is over 6 MB. Choose a smaller one.");return;}photo=f;$("thumbImg").src=URL.createObjectURL(f);$("thumbName").textContent=f.name;$("thumb").hidden=false;};
+$("thumbX").onclick=clearPhoto;
+$("micBtn").onclick=()=>{if(!rec)return;if(listening){rec.stop();return;}rec.lang=lang==="English"?"en-IN":"hi-IN";try{rec.start();}catch(e){}};
+function drawAppls(){const w=$("appls");w.textContent="";profile.appliances.forEach((a,i)=>{const r=el("div","appl");const t=el("select");t.setAttribute("aria-label","Appliance");["","AC","Washing machine","Fridge","Water purifier","Geyser","Microwave","TV","Mixer","Chimney","Other"].forEach(o=>{const op=el("option",null,o||"Choose");op.value=o;t.appendChild(op);});t.value=a.type||"";
+  const b=el("input");b.placeholder="Brand";b.setAttribute("aria-label","Brand");b.value=a.brand||"";const y=el("input");y.type="number";y.placeholder="Year";y.setAttribute("aria-label","Year bought");y.min=2005;y.max=new Date().getFullYear();y.value=a.year||"";
+  const x=el("button","btn-quiet","Remove");x.type="button";
+  t.onchange=()=>{a.type=t.value;saveProfile();};b.onchange=()=>{a.brand=b.value.trim();saveProfile();};y.onchange=()=>{a.year=y.value;saveProfile();};x.onclick=()=>{profile.appliances.splice(i,1);saveProfile();drawAppls();};
+  [t,b,y,x].forEach(n=>r.appendChild(n));w.appendChild(r);});}
+function saveProfile(){store.set("foc_profile",profile);}
+$("addAppl").onclick=()=>{profile.appliances.push({type:"",brand:"",year:""});drawAppls();};
+$("home").value=profile.home;$("soc").value=profile.soc;$("home").onchange=e=>{profile.home=e.target.value;saveProfile();};$("soc").onchange=e=>{profile.soc=e.target.value;saveProfile();};
+drawAreas();drawAppls();renderRecord();
+Object.keys(V).forEach(k=>{const m=V[k];const d=el("div","lg");d.style.setProperty("--v","var("+m[1]+")");d.style.setProperty("--s","var("+m[1]+"-soft)");const o=el("span","dot");o.appendChild(icon(m[2]));d.appendChild(o);d.appendChild(el("span",null,m[0]));$("legend").appendChild(d);});
+$("photoBtn").hidden=false;
+(()=>{const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR)return;rec=new SR();rec.interimResults=false;rec.continuous=false;$("micBtn").hidden=false;
+  rec.onresult=e=>{const t=Array.from(e.results).map(r=>r[0].transcript).join(" ");const b=$("box");b.value=(b.value?b.value+" ":"")+t;};
+  const set=on=>{listening=on;$("micBtn").classList.toggle("live",on);$("micTxt").textContent=on?"Stop":"Speak";};
+  rec.onstart=()=>set(true);rec.onend=()=>set(false);rec.onerror=()=>set(false);})();
+</script>
+</body>
+</html>
